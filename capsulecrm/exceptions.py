@@ -20,3 +20,7 @@ class AuthenticationFailedError(BaseError):
 
 class ForbiddenError(BaseError):
     pass
+
+
+class NextLinkUnavailableError(BaseError):
+    pass

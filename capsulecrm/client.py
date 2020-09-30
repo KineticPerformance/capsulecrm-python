@@ -24,6 +24,7 @@ class Client(object):
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = None
+        self.link_next = None
         if api_version not in self._VALID_VERSIONS:
             self.api_version = self._VALID_VERSIONS[0]
         self.base_url = self.RESOURCE + self.api_version + '/'
@@ -306,6 +307,23 @@ class Client(object):
         """
         return self._post('/tasks', **{'task': embed})
 
+    def follow_next(self):
+        """
+        Capsule will return 'url' in the json if there is another
+        page of results from the previous request
+        """
+        if self.link_next:
+            next_link = self.link_next.get('url', None)
+            if next_link:
+                return self._parse(
+                    requests.get(
+                        next_link,
+                        headers=self._get_headers()
+                    )
+                )
+        else:
+            raise exceptions.NextLinkUnavailableError
+
     def _get_headers(self, content_type='application/json', headers=None):
         _headers = {
             'Authorization': 'Bearer ' + self.token
@@ -352,6 +370,7 @@ class Client(object):
         return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
 
     def _parse(self, response):
+        self.link_next = response.links.get('next', None)
         status_code = response.status_code
         if status_code == 204:
             return None
