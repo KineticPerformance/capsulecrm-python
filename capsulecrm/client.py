@@ -17,6 +17,7 @@ class Client(object):
     AUTHORITY_URL = 'https://api.capsulecrm.com/'
     AUTH_ENDPOINT = 'oauth/authorise?'
     TOKEN_ENDPOINT = 'oauth/token'
+    REVOKE_ENDPOINT = TOKEN_ENDPOINT + '/revoke'
 
     RESOURCE = 'https://api.capsulecrm.com/api/'
     _VALID_VERSIONS = ['v2', ]
@@ -60,6 +61,12 @@ class Client(object):
             'grant_type': 'refresh_token',
         }
         return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
+
+    def revoke_token(self):
+        data = {
+            'token': self.token
+        }
+        return self._parse(requests.post(self.AUTHORITY_URL + self.REVOKE_ENDPOINT, data=data))
 
     def set_token(self, token):
         self.token = token
@@ -350,14 +357,14 @@ class Client(object):
 
     def _parse(self, response):
         status_code = response.status_code
+        if status_code == 204:
+            return None
         if 'application/json' in response.headers['Content-Type']:
             r = response.json()
         else:
             r = response.text
         if status_code in (200, 201, 202):
             return r
-        elif status_code == 204:
-            return None
         elif status_code == 400:
             raise exceptions.BadRequestError(r)
         elif status_code == 401:
