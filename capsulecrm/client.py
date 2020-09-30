@@ -1,5 +1,4 @@
-from urllib.parse import urlencode
-
+import enum
 import requests
 import json
 # Python 2/3 version compatibility
@@ -324,6 +323,35 @@ class Client(object):
         else:
             raise exceptions.NextLinkUnavailableError
 
+    def rest_hook_create(self, endpoint, action, target_url, secret):
+        """
+        Args:
+            endpoint: RestHookEndpoint
+            action: RestHookAction
+            target_url: str - location for the resthook to post information to
+            secret: str - url for verifying capsule authenticity
+        """
+        if action not in _restHookCompatibility[endpoint]:
+            raise exceptions.RestHookIncompatible
+        data = {
+            'restHook': {
+                'event': endpoint.name + '/' + action.name,
+                'targetUrl': target_url + 'secret=' + secret,
+                'description': 'undefined',
+            }
+        }
+        result = self._post('/resthooks', **data)
+        return result
+
+    def get_rest_hooks(self, target_hook_id=None):
+        endpoint = '/resthooks'
+        if target_hook_id:
+            endpoint += '/' + target_hook_id
+        return self._get(endpoint)['restHooks']
+
+    def unsub_rest_hook(self, resthook_id):
+        return self._delete('/resthooks/{}'.format(resthook_id))
+
     def _get_headers(self, content_type='application/json', headers=None):
         _headers = {
             'Authorization': 'Bearer ' + self.token
@@ -392,3 +420,55 @@ class Client(object):
             raise exceptions.TooManyRequestsError(r)
         else:
             raise exceptions.UnknownError(r)
+
+
+class RestHookEndpoint(enum.Enum):
+    party = 1
+    kase = 2
+    opportunity = 3
+    task = 4
+    user = 5
+
+
+class RestHookAction(enum.Enum):
+    created = 101
+    updated = 102
+    deleted = 103
+    closed = 104
+    completed = 105
+
+
+_restHookCompatibility = {
+    RestHookEndpoint.party:
+        [
+            RestHookAction.created,
+            RestHookAction.updated,
+            RestHookAction.deleted
+        ],
+    RestHookEndpoint.kase:
+        [
+            RestHookAction.created,
+            RestHookAction.updated,
+            RestHookAction.deleted,
+            RestHookAction.closed
+        ],
+    RestHookEndpoint.opportunity:
+        [
+            RestHookAction.created,
+            RestHookAction.updated,
+            RestHookAction.deleted,
+            RestHookAction.closed
+        ],
+    RestHookEndpoint.task:
+        [
+            RestHookAction.created,
+            RestHookAction.updated,
+            RestHookAction.completed
+        ],
+    RestHookEndpoint.user:
+        [
+            RestHookAction.created,
+            RestHookAction.updated,
+            RestHookAction.deleted
+        ],
+}

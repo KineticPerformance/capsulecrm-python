@@ -28,3 +28,7 @@ class NextLinkUnavailableError(BaseError):
 
 class TooManyRequestsError(BaseError):
     pass
+
+
+class RestHookIncompatible(BaseError):
+    pass
