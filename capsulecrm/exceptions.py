@@ -24,3 +24,7 @@ class ForbiddenError(BaseError):
 
 class NextLinkUnavailableError(BaseError):
     pass
+
+
+class TooManyRequestsError(BaseError):
+    pass

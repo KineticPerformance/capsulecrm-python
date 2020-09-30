@@ -388,5 +388,7 @@ class Client(object):
             raise exceptions.ForbiddenError(r)
         elif status_code == 422:
             raise exceptions.ValidationFailedError(r)
+        elif status_code == 429:
+            raise exceptions.TooManyRequestsError(r)
         else:
             raise exceptions.UnknownError(r)
