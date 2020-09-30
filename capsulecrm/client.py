@@ -4,6 +4,13 @@ import requests
 
 from capsulecrm import exceptions
 import json
+# Python 2/3 version compatibility
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
+from capsulecrm import exceptions
 
 
 class Client(object):
