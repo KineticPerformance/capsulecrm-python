@@ -38,7 +38,7 @@ class Client(object):
         if scope:
             params['scope'] = ' '.join(scope),
         if state:
-            params['state'] = None
+            params['state'] = state
         return self.AUTHORITY_URL + self.AUTH_ENDPOINT + urlencode(params)
 
     def exchange_code(self, redirect_uri, code):
