@@ -1,8 +1,6 @@
 from urllib.parse import urlencode
 
 import requests
-
-from capsulecrm import exceptions
 import json
 # Python 2/3 version compatibility
 try:
