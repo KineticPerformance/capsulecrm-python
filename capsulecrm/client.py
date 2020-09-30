@@ -303,8 +303,34 @@ class Client(object):
         """
         return self._post('/tasks', **{'task': embed})
 
-    def _get(self, url, **kwargs):
-        return self._request('GET', url, **kwargs)
+    def _get_headers(self, content_type='application/json', headers=None):
+        _headers = {
+            'Authorization': 'Bearer ' + self.token
+        }
+        if content_type:
+            _headers['Content-Type'] = content_type
+        if headers:
+            _headers.update(headers)
+        return _headers
+
+    def _get(self, url, headers=None, **kwargs):
+        _headers = self._get_headers(
+            headers=headers
+        )
+        if kwargs:
+            filtered_params = {}
+            for k, v in kwargs.get('params').items():
+                if v:
+                    filtered_params[k] = v
+            payload = '?' + urlencode(filtered_params)
+        else:
+            payload = ''
+        return self._parse(
+            requests.get(
+                self.base_url + url + payload,
+                headers=_headers
+            )
+        )
 
     def _post(self, url, **kwargs):
         return self._request('POST', url, **kwargs)
@@ -319,12 +345,7 @@ class Client(object):
         return self._request('DELETE', url, **kwargs)
 
     def _request(self, method, endpoint, headers=None, **kwargs):
-        _headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + self.token['access_token']
-        }
-        if headers:
-            _headers.update(headers)
+        _headers = self._get_headers(headers=headers)
         return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
 
     def _parse(self, response):
