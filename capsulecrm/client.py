@@ -1,14 +1,9 @@
 import enum
 import requests
 import json
-# Python 2/3 version compatibility
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
+from urllib.parse import urlencode
 
 from capsulecrm import exceptions
-
 
 class Client(object):
     AUTHORITY_URL = 'https://api.capsulecrm.com/'
@@ -104,8 +99,11 @@ class Client(object):
     def create_person(self, embed):
         """Returns the created person.
         Args:
-            embed: Dict { 'firstName': String required, 'lastName': String required, 'title': String,
-                          'jobTitle': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof), 'organisation': String,
+            embed: Dict { 'firstName': String required,
+                          'lastName': String required,
+                          'title': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof),
+                          'jobTitle': String,
+                          'organisation': String,
                           'about': String,
                           'addresses': dict { 'type': String (Home, Postal, Office),
                                               'street': String,
@@ -119,7 +117,6 @@ class Client(object):
                                                                          YOUTUBE, INSTAGRAM, PINTEREST),
                                              'address': String required,
                                              'type': String (Home, Work),
-                                             'url': String required },
                           'emailAddresses': dict { 'type': String (Home, Work),
                                                    'address': String required },
                           'tags': dict { 'id': Long,
@@ -291,20 +288,91 @@ class Client(object):
 
     def create_task(self, embed):
         """Returns the created task.
+        One of Party, Opportunity or Kase must be included
         Args:
-            embed: Dict { 'party': dict { 'id': Long required },
+            embed: Dict {
                           'detail': String required,
+                          'category': category ID.
                           'description': String,
                           'dueOn': String,
                           'dueTime': dict { 'amount': Double required, 'currency': String },
                           'oportunity': dict { 'id': Long required },
+                          'party': dict { 'id': Long required },
+                          'kase': dict { 'id': Long required },
                           'owner': dict { 'id': Long required },
-                          'completeAt': String,
+                          'completedAt': String,
                         }
         Returns:
             A dict.
         """
         return self._post('/tasks', **{'task': embed})
+
+    def list_projects(self, page=None, perpage=None, embed=None, since=None):
+        """Returns the all tasks.
+        Args:
+            page: Integer
+            perpage: Integer
+            embed: dict
+        Returns:
+            A dict.
+        """
+        data = {
+            'since': since,
+            'page': page,
+            'perPage': perpage,
+            'embed': embed
+        }
+        return self._get('/kases', params=data)
+
+    def filter_order_data(self, entity, conditions=None, order_by=None, page=None, per_page=None, embed=None):
+        """
+        Perform structured searches on parties, projects and opportunities
+        Args:
+            entity: (str) parties, projects, opportunities
+            conditions: array of (dict)
+                field: entity field reference
+                operator: some options are "is", "contains", "is greater than"
+                value: variable used to filter depending on operator.
+            order_by: array of (dict)
+                field: entity field reference
+                direction: "ascending" or "descending"
+            page: (int)
+            perpage: (int)
+            embed: (str) separated by commas, supported values depending on entity
+        """
+        params = {
+            'page': page,
+            'perPage': per_page,
+            'embed': embed
+        }
+        data = {
+            "filter": {}
+        }
+        if conditions:
+            data["filter"].update(conditions=conditions)
+        if order_by:
+            data["filter"].update(orderBy=order_by)
+        return self._post(f'{entity}/filters/results', params=params, **data)
+
+    def get_custom_fields(self, entity, page=None, per_page=None):
+        """
+        Returns custom fields for specific entity
+        Entity options: parties, opportunities or kases
+        """
+        params = {
+            'page': page,
+            'perPage': per_page
+        }
+        return self._get(f'{entity}/fields/definitions', params=params)
+
+    def list_countries(self):
+        return self._get('/countries')
+
+    def list_currencies(self):
+        return self._get('/currencies')
+
+    def list_categories(self):
+        return self._get('/categories')
 
     def follow_next(self):
         """
@@ -362,24 +430,8 @@ class Client(object):
             _headers.update(headers)
         return _headers
 
-    def _get(self, url, headers=None, **kwargs):
-        _headers = self._get_headers(
-            headers=headers
-        )
-        if kwargs:
-            filtered_params = {}
-            for k, v in kwargs.get('params').items():
-                if v:
-                    filtered_params[k] = v
-            payload = '?' + urlencode(filtered_params)
-        else:
-            payload = ''
-        return self._parse(
-            requests.get(
-                self.base_url + url + payload,
-                headers=_headers
-            )
-        )
+    def _get(self, url, **kwargs):
+        return self._request('GET', url, **kwargs)
 
     def _post(self, url, **kwargs):
         return self._request('POST', url, **kwargs)
@@ -395,7 +447,11 @@ class Client(object):
 
     def _request(self, method, endpoint, headers=None, **kwargs):
         _headers = self._get_headers(headers=headers)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
+        return self._parse(requests.request(method,
+                                            self.base_url + endpoint,
+                                            headers=_headers,
+                                            data=json.dumps(kwargs),
+                                            params=params))
 
     def _parse(self, response):
         self.link_next = response.links.get('next', None)
