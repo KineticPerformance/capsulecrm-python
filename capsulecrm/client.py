@@ -445,7 +445,7 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request('DELETE', url, **kwargs)
 
-    def _request(self, method, endpoint, headers=None, **kwargs):
+    def _request(self, method, endpoint, headers=None, params=None, **kwargs):
         _headers = self._get_headers(headers=headers)
         return self._parse(requests.request(method,
                                             self.base_url + endpoint,
