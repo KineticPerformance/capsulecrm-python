@@ -135,7 +135,7 @@ class Client(object):
             }
         }
         data['party'].update(embed)
-        return self._post('/parties', **data)
+        return self._post('parties', **data)
 
     def create_organisation(self, embed):
         """Returns the created organisation.
@@ -172,7 +172,7 @@ class Client(object):
             }
         }
         data['party'].update(embed)
-        return self._post('/parties', **data)
+        return self._post('parties', **data)
 
     def list_parties(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
@@ -190,7 +190,7 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/parties', params=data)
+        return self._get('parties', params=data)
 
     def create_milestone(self, name, description, probability, complete=False):
         """Returns the create milestone.
@@ -210,7 +210,7 @@ class Client(object):
                 'complete': complete
             }
         }
-        return self._post('/milestones', **data)
+        return self._post('milestones', **data)
 
     def list_milestone(self, page=None, perpage=None):
         """Returns the all milestones.
@@ -224,7 +224,7 @@ class Client(object):
             'page': page,
             'perPage': perpage
         }
-        return self._get('/milestones', params=data)
+        return self._get('milestones', params=data)
 
     def create_oppotunity(self, embed):
         """Returns the created oppotunity.
@@ -243,7 +243,7 @@ class Client(object):
             'opportunity': {}
         }
         data['opportunity'].update(embed)
-        return self._post('/opportunities', **data)
+        return self._post('opportunities', **data)
 
     def list_opportunities(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
@@ -261,13 +261,13 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/opportunities', params=data)
+        return self._get('opportunities', params=data)
 
     def get_current_user(self):
-        return self._get('/users/current')
+        return self._get('users/current')
 
     def list_users(self):
-        return self._get('/users')
+        return self._get('users')
 
     def list_tasks(self, page=None, perpage=None, embed=None, since=None):
         """Returns the all tasks.
@@ -284,7 +284,7 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/tasks', params=data)
+        return self._get('tasks', params=data)
 
     def create_task(self, embed):
         """Returns the created task.
@@ -305,7 +305,7 @@ class Client(object):
         Returns:
             A dict.
         """
-        return self._post('/tasks', **{'task': embed})
+        return self._post('tasks', **{'task': embed})
 
     def list_projects(self, page=None, perpage=None, embed=None, since=None):
         """Returns the all tasks.
@@ -322,7 +322,7 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/kases', params=data)
+        return self._get('kases', params=data)
 
     def filter_order_data(self, entity, conditions=None, order_by=None, page=None, per_page=None, embed=None):
         """
@@ -366,13 +366,13 @@ class Client(object):
         return self._get(f'{entity}/fields/definitions', params=params)
 
     def list_countries(self):
-        return self._get('/countries')
+        return self._get('countries')
 
     def list_currencies(self):
-        return self._get('/currencies')
+        return self._get('currencies')
 
     def list_categories(self):
-        return self._get('/categories')
+        return self._get('categories')
 
     def follow_next(self):
         """
@@ -408,7 +408,7 @@ class Client(object):
                 'description': 'undefined',
             }
         }
-        result = self._post('/resthooks', **data)
+        result = self._post('resthooks', **data)
         return result
 
     def get_rest_hooks(self, target_hook_id=None):
