@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 from capsulecrm import exceptions
 
+
 class Client(object):
     AUTHORITY_URL = 'https://api.capsulecrm.com/'
     AUTH_ENDPOINT = 'oauth/authorise?'
@@ -66,7 +67,7 @@ class Client(object):
         """Returns the created tag.
         Args:
             entity: String [parties, opportunities, kases]
-            name: String requerid
+            name: String required
             description: String
             datatag: Boolean
         Returns:
@@ -116,16 +117,17 @@ class Client(object):
                           'websites': dict { 'service': String required (URL, SKYPE, TWITTER, LINKED_IN, FLICKR, GITHUB,
                                                                          YOUTUBE, INSTAGRAM, PINTEREST),
                                              'address': String required,
-                                             'type': String (Home, Work),
+                                             'type': String (Home, Work) },
                           'emailAddresses': dict { 'type': String (Home, Work),
                                                    'address': String required },
                           'tags': dict { 'id': Long,
                                          'name': String required,
                                          'description': String },
                           'fields': dict { 'id': Long,
-                                           'value': Multiple requerid,
-                                           'definition': dict requerid { 'id': Long,
+                                           'value': Multiple required,
+                                           'definition': dict required { 'id': Long,
                                                                          'name': String } }
+                          }
         Returns:
             A dict.
         """
@@ -160,9 +162,10 @@ class Client(object):
                                          'name': String required,
                                          'description': String },
                           'fields': dict { 'id': Long,
-                                           'value': Multiple requerid,
-                                           'definition': dict requerid { 'id': Long,
+                                           'value': Multiple required,
+                                           'definition': dict required { 'id': Long,
                                                                          'name': String } }
+                         }
         Returns:
             A dict.
         """
@@ -226,8 +229,8 @@ class Client(object):
         }
         return self._get('milestones', params=data)
 
-    def create_oppotunity(self, embed):
-        """Returns the created oppotunity.
+    def create_opportunity(self, embed):
+        """Returns the created opportunity.
         Args:
             embed: Dict { 'description' : String
                           'party': dict { 'id': Long required },
@@ -296,7 +299,7 @@ class Client(object):
                           'description': String,
                           'dueOn': String,
                           'dueTime': dict { 'amount': Double required, 'currency': String },
-                          'oportunity': dict { 'id': Long required },
+                          'opportunity': dict { 'id': Long required },
                           'party': dict { 'id': Long required },
                           'kase': dict { 'id': Long required },
                           'owner': dict { 'id': Long required },
@@ -337,7 +340,7 @@ class Client(object):
                 field: entity field reference
                 direction: "ascending" or "descending"
             page: (int)
-            perpage: (int)
+            per_page: (int)
             embed: (str) separated by commas, supported values depending on entity
         """
         params = {
@@ -356,8 +359,8 @@ class Client(object):
 
     def get_custom_fields(self, entity, page=None, per_page=None):
         """
-        Returns custom fields for specific entity
-        Entity options: parties, opportunities or kases
+        Returns custom fields for specific entity.
+        Entity options: parties, opportunities or kases.
         """
         params = {
             'page': page,
@@ -412,13 +415,13 @@ class Client(object):
         return result
 
     def get_rest_hooks(self, target_hook_id=None):
-        endpoint = '/resthooks'
+        endpoint = 'resthooks'
         if target_hook_id:
             endpoint += '/' + target_hook_id
         return self._get(endpoint)['restHooks']
 
     def unsub_rest_hook(self, resthook_id):
-        return self._delete('/resthooks/{}'.format(resthook_id))
+        return self._delete('resthooks/{}'.format(resthook_id))
 
     def _get_headers(self, content_type='application/json', headers=None):
         _headers = {
